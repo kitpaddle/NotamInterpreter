@@ -9,8 +9,8 @@ let notamData = [];
 app.get('/notams', (req, res) => {
   
   //console.log(notamData);
-  //res.json(notamData);
-  res.json("moo");
+  res.json(notamData);
+  //res.json("moo");
   console.log("Data requested. Data sent");
 });
 
