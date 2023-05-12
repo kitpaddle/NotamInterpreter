@@ -29,7 +29,9 @@ app.use((req, res, next) => {
 app.get('/notams', async (req, res) => {
   try {
     const notamData = await getNotamData();
-    console.log(notamData);
+    console.log("Success!");
+    console.log("Notam data fetched from LFV for :"+notamData.length+" airports.");
+    console.log("Data sent to client.");
     res.json(notamData);
   } catch (error) {
     console.error(error);
