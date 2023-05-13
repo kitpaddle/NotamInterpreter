@@ -2,14 +2,15 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const helmet = require('helmet');
-const https = require('https');
-const fs = require('fs');
+//const https = require('https');
+//const fs = require('fs');
 
-
+/*
 const options = {
   key: fs.readFileSync('private.key'),
   cert: fs.readFileSync('certificate.crt')
 };
+*/
 
 const app = express();
 
@@ -50,17 +51,17 @@ app.get('/test', (req,res)=>{
   res.send("Reply from server successful");
 });
 
-const httpsServer = https.createServer(options, app);
+//const httpsServer = https.createServer(options, app);
 
-/*
+
 app.listen(3000, () => {
   console.log('server started');
 });
-*/
 
+/*
 httpsServer.listen(3000, () => {
   console.log('Express server running over HTTPS with self-signed certificate');
-});
+});*/
 
 async function getNotamData() {
   console.log("Fetching NOTAM from LFV");
