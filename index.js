@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const https = require('https');
 const fs = require('fs');
 
+
 const options = {
   key: fs.readFileSync('private.key'),
   cert: fs.readFileSync('certificate.crt')
@@ -12,7 +13,6 @@ const options = {
 
 const app = express();
 
-//let notamData = [];
 
 // set the CSP policy using the helmet middleware
 /*
@@ -57,6 +57,7 @@ app.listen(3000, () => {
   console.log('server started');
 });
 */
+
 httpsServer.listen(3000, () => {
   console.log('Express server running over HTTPS with self-signed certificate');
 });
