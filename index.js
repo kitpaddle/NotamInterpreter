@@ -5,8 +5,8 @@ const helmet = require('helmet');
 const mongoose = require('mongoose');
 
 // Variables to keep secret
-const mongouri = process.env['MONGO_URI'];
-const swedaviakey = process.env['SWEDAVIA_KEY'];
+const mongouri = 'mongodb+srv://kitpaddle:zoidberg88@cluster0.icwrw0m.mongodb.net/?retryWrites=true&w=majority'
+const swedaviakey = 'af25188efa60417aa93910f37c439959';
 
 const app = express();
 
