@@ -50,10 +50,23 @@ app.use((req, res, next) => {
 app.get('/notams', async (req, res) => {
   try {
     const notamData = await getNotamData();
-    console.log("Success!");
+
     console.log("Notam data fetched from LFV for :"+notamData.length+" airports.");
     console.log("Data sent to client.");
     res.json(notamData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+});
+
+// GET request for NOTAM Data
+app.get('/metars', async (req, res) => {
+  try {
+    const metarData = await getMetarData();
+    console.log("Metar data fetched from LFV for :"+metarData.length+" airports.");
+    console.log("Data sent to client.");
+    res.json(metarData);
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
@@ -152,12 +165,16 @@ async function getNotamData() {
     const nameMatch = entries[i].match(rFindName);
     const aerodromeName = nameMatch[1].trim();
 
+    if(!aerodromeName.substring(0, 4).startsWith('ES')){continue};
+    // This filters off any non-swedish airports
+    
     const notamsArr = rest.match(rFindNotam);
-    let notams = [];
 
+    let notams = [];
     if (rFindNIL.test(rest)) {
       notams = "NIL";
     }else{
+      //if(notamsArr === null){ continue; }; //protects against if it doesn't find a match
       for (let j = 0; j < notamsArr.length; j++) {
         const fromDateArr = notamsArr[j].match(
           /FROM:\s+(\d{1,2}\s+\w+\s+\d{4}\s+\d{2}:\d{2})/
@@ -169,7 +186,7 @@ async function getNotamData() {
         const notamNameArr = notamsArr[j].match(/ES\/[A-Z]\d{4}\/\d{2}/);
         let notamContent = notamsArr[j].substring(3).trim();
         notamContent = notamContent.substring(0, notamContent.indexOf("FROM:")).trim();
-  
+        
         notams.push({
           id: notamNameArr[0],
           from: fromDateArr[1],
@@ -178,7 +195,6 @@ async function getNotamData() {
         });
       }
     }
-      
     notamData.push({
       icao: aerodromeName.substring(0, 4),
       name: aerodromeName.substring(5),
@@ -187,6 +203,32 @@ async function getNotamData() {
   }
   return notamData;
 }
+
+async function getMetarData() {
+  console.log("Fetching METAR from LFV");
+  const response = await axios.get(
+    "https://www.aro.lfv.se/Links/Link/ViewLink?TorLinkId=314&type=MET"
+  );
+
+  const $ = cheerio.load(response.data);
+
+  const metarData = [];
+
+  $('span.tor-link-text-row-item.item-header').each((index, element) => {
+    const icaoElement = $(element);
+    const icao = icaoElement.text().trim();
+    
+    const metarElement = icaoElement.next('span.tor-link-text-row-item.item-text');
+    const metar = metarElement.text().trim().replace(/=$/, ''); // Trim the "=" sign at the end
+      
+    metarData.push({icao: icao, metar: metar});
+    
+  });
+  console.log(metarData);
+  return metarData;
+}
+
+getMetarData();
 
 // Getting the data from the Swedavia API
 // Saves it locally to array
