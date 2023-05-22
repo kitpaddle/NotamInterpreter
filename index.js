@@ -225,11 +225,11 @@ async function getMetarData() {
     
     const metarElement = icaoElement.next('span.tor-link-text-row-item.item-text');
     const metar = metarElement.text().trim().replace(/=$/, ''); // Trim the "=" sign at the end
-      
+
     metarData.push({icao: icao, metar: metar});
     
   });
-  console.log(metarData);
+  metarData.shift(); //removing first element as its a false one.
   return metarData;
 }
 
