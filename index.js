@@ -151,7 +151,7 @@ async function getNotamData() {
   const rFindRest = /(?<=<<<).*/s;
   const rFindNIL = /[\r\n\s]*NIL[\r\n\s]*/;
   const rFindNotam = /[+-]\s{2}.*?ES\/[A-Z]\d{4}\/\d{2}/gs;
-
+  const rCutOff = "EN-ROUTE";
   const notamData = [];
 
   for (let i = 0; i < entries.length; i++) {
@@ -160,21 +160,25 @@ async function getNotamData() {
     }
 
     const tMatch = entries[i].match(rFindRest);
-    const rest = tMatch[0];
+    let rest = tMatch[0];
+
+    // This filters out any text after the string EN-ROUTE inside a NOTAM
+    let stringCheckIndex = rest.indexOf("EN-ROUTE");
+    if(stringCheckIndex != -1){ rest = rest.substring(0, stringCheckIndex); }
 
     const nameMatch = entries[i].match(rFindName);
     const aerodromeName = nameMatch[1].trim();
 
-    if(!aerodromeName.substring(0, 4).startsWith('ES')){continue};
     // This filters off any non-swedish airports
+    if(!aerodromeName.substring(0, 4).startsWith('ES')){continue};
     
     const notamsArr = rest.match(rFindNotam);
-
+    //console.log("NAME: "+aerodromeName);
     let notams = [];
     if (rFindNIL.test(rest)) {
       notams = "NIL";
     }else{
-      //if(notamsArr === null){ continue; }; //protects against if it doesn't find a match
+      //console.log("how many notams found:"+notamsArr.length);
       for (let j = 0; j < notamsArr.length; j++) {
         const fromDateArr = notamsArr[j].match(
           /FROM:\s+(\d{1,2}\s+\w+\s+\d{4}\s+\d{2}:\d{2})/
@@ -182,6 +186,7 @@ async function getNotamData() {
         const toDateArr = notamsArr[j].match(
           /TO:\s+(\d{1,2}\s+\w+\s+\d{4}\s+\d{2}:\d{2})|TO:\sPERM/
         );
+        //console.log("airport "+i+" and"+ j);
         const toDateStr = toDateArr[1] || "PERM";
         const notamNameArr = notamsArr[j].match(/ES\/[A-Z]\d{4}\/\d{2}/);
         let notamContent = notamsArr[j].substring(3).trim();
