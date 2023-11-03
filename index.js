@@ -16,6 +16,8 @@ let datetoday;
 let dateminusone;
 let dateminustwo;
 let swedaviaData = [];
+let nData = [];
+let mData = [];
 
 /////// Open connection to Mongo DB database
 // Keeping it open as per recommendation
@@ -49,11 +51,10 @@ app.use((req, res, next) => {
 // GET request for NOTAM Data
 app.get('/notams', async (req, res) => {
   try {
-    const notamData = await getNotamData();
-
-    console.log("Notam data fetched from LFV for :"+notamData.length+" airports.");
+    //const notamData = await getNotamData();
+    console.log("Request for Notam data received. Sending data for: "+nData.length+" airports.");
     console.log("Data sent to client.");
-    res.json(notamData);
+    res.json(nData);
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
@@ -63,10 +64,10 @@ app.get('/notams', async (req, res) => {
 // GET request for NOTAM Data
 app.get('/metars', async (req, res) => {
   try {
-    const metarData = await getMetarData();
-    console.log("Metar data fetched from LFV for :"+metarData.length+" airports.");
+    //const metarData = await getMetarData();
+    console.log("Request for Metar data received. Sending data for: "+mData.length+" airports.");
     console.log("Data sent to client.");
-    res.json(metarData);
+    res.json(mData);
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
@@ -213,7 +214,10 @@ async function getNotamData() {
       snowtams: snowtam
     });
   }
-  return notamData;
+  //return notamData;
+  // Only updates data if it is not empty (due to error or something else)
+  if(notamData.length){nData = notamData;} // Saving fetched data in global variable
+  console.log("Notam data fetched successfully and saved on server");
 }
 
 async function getMetarData() {
@@ -237,10 +241,13 @@ async function getMetarData() {
     
   });
   metarData.shift(); //removing first element as its a false one.
-  return metarData;
+  //return metarData;
+  // Only updates data if it is not empty (due to error or something else)
+  if(metarData.length) {mData = metarData;} // Saving fetched data in global variable
+  console.log("Metardata fetched successfully and saved on server");
 }
 
-getMetarData();
+//getMetarData();
 
 // Getting the data from the Swedavia API
 // Saves it locally to array
@@ -378,6 +385,15 @@ async function updateData(){
   });
 }
 
-updateData();
+async function updateLFVdata(){
+  // Calls the two functions that fetch the data and save it locally on server.
+  console.log("Updating Notam and Metar data, fetched at time: "+new Date());
+  getNotamData();
+  getMetarData();
+}
 
-setInterval(updateData, 1000 * 60 * 60 * 24);
+updateData();
+updateLFVdata();
+
+setInterval(updateData, 1000 * 60 * 60 * 24); // Once a day
+setInterval(updateLFVdata, 1000 * 60 * 20);   // Once every 20 min
