@@ -177,15 +177,15 @@ async function getNotamData() {
     if(rFindSnowtam.test(rest)){
       snowtam = rest.match(rFindSnowtam);
     }
-    console.log(notamsArr);
-    console.log("NAME: "+aerodromeName);
+    //console.log(notamsArr);
+    //console.log("NAME: "+aerodromeName);
     let notams = [];
     if (rFindNIL.test(rest)) {
       notams = "NIL";
     }else if(notamsArr){
       //console.log("how many notams found:"+notamsArr.length);
       for (let j = 0; j < notamsArr.length; j++) {
-        console.log(notamsArr[j]);
+        //console.log(notamsArr[j]);
         const fromDateArr = notamsArr[j].match(
           /FROM:\s+(\d{1,2}\s+\w+\s+\d{4}\s+\d{2}:\d{2})/
         );
