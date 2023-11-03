@@ -151,6 +151,7 @@ async function getNotamData() {
   const rFindRest = /(?<=<<<).*/s;
   const rFindNIL = /[\r\n\s]*NIL[\r\n\s]*/;
   const rFindNotam = /[+-]\s{2}.*?ES\/[A-Z]\d{4}\/\d{2}/gs;
+  const rFindSnowtam = /[+-]\s\(SNOWTAM.*\d{2}:\d{2}/;
   const rCutOff = "EN-ROUTE";
   const notamData = [];
 
@@ -165,7 +166,6 @@ async function getNotamData() {
     // This filters out any text after the string EN-ROUTE inside a NOTAM
     let stringCheckIndex = rest.indexOf("EN-ROUTE");
     if(stringCheckIndex != -1){ rest = rest.substring(0, stringCheckIndex); }
-
     const nameMatch = entries[i].match(rFindName);
     const aerodromeName = nameMatch[1].trim();
 
@@ -173,13 +173,19 @@ async function getNotamData() {
     if(!aerodromeName.substring(0, 4).startsWith('ES')){continue};
     
     const notamsArr = rest.match(rFindNotam);
-    //console.log("NAME: "+aerodromeName);
+    let snowtam = "";
+    if(rFindSnowtam.test(rest)){
+      snowtam = rest.match(rFindSnowtam);
+    }
+    console.log(notamsArr);
+    console.log("NAME: "+aerodromeName);
     let notams = [];
     if (rFindNIL.test(rest)) {
       notams = "NIL";
-    }else{
+    }else if(notamsArr){
       //console.log("how many notams found:"+notamsArr.length);
       for (let j = 0; j < notamsArr.length; j++) {
+        console.log(notamsArr[j]);
         const fromDateArr = notamsArr[j].match(
           /FROM:\s+(\d{1,2}\s+\w+\s+\d{4}\s+\d{2}:\d{2})/
         );
@@ -204,6 +210,7 @@ async function getNotamData() {
       icao: aerodromeName.substring(0, 4),
       name: aerodromeName.substring(5),
       notams: notams,
+      snowtams: snowtam
     });
   }
   return notamData;
